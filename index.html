@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="批量查询 DeepSeek API Key 余额。纯前端静态页面：密钥仅保存在你的浏览器 localStorage 中，查询只发往 DeepSeek 官方接口，绝不上传。">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://api.deepseek.com; base-uri 'none'; form-action 'none'">
+<title>DeepSeek 额度台账 · 批量查询 API Key 余额</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%234b6bfb'/%3E%3Crect%20x='13'%20y='33'%20width='26'%20height='11'%20rx='3'%20fill='white'/%3E%3Crect%20x='13'%20y='19'%20width='38'%20height='11'%20rx='3'%20fill='white'%20opacity='.55'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+
+<!-- 图标库（内联，无外部请求） -->
+<svg class="svg-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.9 10.9 0 0 1 12 19c-6.5 0-10-7-10-7a19.8 19.8 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.9 9.9 0 0 1 12 5c6.5 0 10 7 10 7a19.8 19.8 0 0 1-3.22 4.19"/><path d="m2 2 20 20"/><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></symbol>
+    <symbol id="i-braces" viewBox="0 0 24 24"><path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1"/><path d="M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" class="bm-bg"/><rect x="13" y="33" width="26" height="11" rx="3" class="bm-a"/><rect x="13" y="19" width="38" height="11" rx="3" class="bm-b"/></svg>
+      </span>
+      <span class="brand-text">
+        <strong>DeepSeek 额度台账</strong>
+        <small>批量查询 API Key 余额 · 密钥不出浏览器</small>
+      </span>
+    </div>
+    <div class="top-actions">
+      <span class="stamp" title="本页没有后端：密钥只保存在这台设备的浏览器里，查询仅发往 DeepSeek 官方接口 api.deepseek.com">
+        <svg class="ic"><use href="#i-shield"/></svg>仅本地 · 不上传
+      </span>
+      <button type="button" class="icon-btn" id="themeBtn" aria-label="切换主题" title="切换主题：自动 / 浅色 / 深色">
+        <svg class="ic" data-theme-icon><use href="#i-moon"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 输入区 -->
+  <section class="panel add-panel" aria-labelledby="addTitle">
+    <div class="panel-head">
+      <h2 id="addTitle">添加并查询密钥</h2>
+      <span class="panel-hint">每行一个，粘贴多个可一次批量查询 · Ctrl + Enter 快捷开始</span>
+    </div>
+    <textarea id="keyInput" rows="4" spellcheck="false" autocomplete="off"
+      placeholder="sk-0123456789abcdef0123456789abcdef&#10;sk-ffffffffffffffffffffffffffffffff&#10;（支持空格 / 逗号分隔，自动去重、自动跳过无法识别的内容）"></textarea>
+    <div class="add-actions">
+      <button type="button" class="btn primary" id="btnQueryNew">
+        <svg class="ic"><use href="#i-search"/></svg>查询新密钥
+      </button>
+      <label class="field-label" for="concurrency">并发
+        <select id="concurrency" aria-label="并发数">
+          <option>1</option><option>2</option><option selected>3</option>
+          <option>4</option><option>6</option><option>8</option>
+        </select>
+      </label>
+      <span class="parse-hint" id="parseHint" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <!-- 进度 -->
+  <section class="panel progress-panel" id="progressPanel" hidden aria-live="polite">
+    <div class="progress-row">
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-text mono" id="progressText">0 / 0</span>
+      <button type="button" class="btn ghost" id="btnStop">
+        <svg class="ic"><use href="#i-stop"/></svg>停止
+      </button>
+    </div>
+  </section>
+
+  <!-- 台账 -->
+  <section class="panel ledger-panel" aria-labelledby="ledgerTitle">
+    <div class="panel-head">
+      <h2 id="ledgerTitle">密钥台账</h2>
+      <span class="panel-hint">查询结果保存在本机浏览器，随时导出备份</span>
+    </div>
+
+    <div class="summary" id="summary" aria-live="polite"></div>
+
+    <div class="toolbar">
+      <label class="search-box">
+        <svg class="ic"><use href="#i-search"/></svg>
+        <input type="search" id="searchInput" placeholder="搜索备注或密钥片段" autocomplete="off">
+      </label>
+      <select id="statusFilter" aria-label="按状态筛选">
+        <option value="all">全部状态</option>
+        <option value="ok">可用</option>
+        <option value="unavailable">欠费</option>
+        <option value="invalid">无效</option>
+        <option value="error">查询失败</option>
+        <option value="idle">未查询</option>
+      </select>
+      <select id="sortSelect" aria-label="排序">
+        <option value="added_desc">最近添加</option>
+        <option value="checked_desc">最近查询</option>
+        <option value="balance_desc">余额从高到低</option>
+        <option value="remark_asc">按备注</option>
+      </select>
+      <span class="toolbar-spacer"></span>
+      <button type="button" class="btn" id="btnRefreshAll" title="重新查询台账中的全部密钥">
+        <svg class="ic"><use href="#i-refresh"/></svg>刷新全部
+      </button>
+      <button type="button" class="btn" id="btnExportJson" title="导出 JSON 备份（含完整密钥，请妥善保管）">
+        <svg class="ic"><use href="#i-download"/></svg>JSON
+      </button>
+      <button type="button" class="btn" id="btnExportCsv" title="导出 CSV 表格（含完整密钥，请妥善保管）">
+        <svg class="ic"><use href="#i-download"/></svg>CSV
+      </button>
+      <button type="button" class="btn" id="btnImport" title="导入 JSON 备份或纯文本密钥列表">
+        <svg class="ic"><use href="#i-upload"/></svg>导入
+      </button>
+      <button type="button" class="icon-btn" id="btnMask" aria-pressed="true" title="显示 / 隐藏全部密钥">
+        <svg class="ic"><use href="#i-eye-off"/></svg>
+      </button>
+      <button type="button" class="btn danger ghost" id="btnClear" title="删除台账中的全部密钥">
+        <svg class="ic"><use href="#i-trash"/></svg>清空
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="ledger" id="ledgerTable">
+        <thead>
+          <tr>
+            <th class="col-sel"><input type="checkbox" id="selAll" aria-label="全选 / 取消全选"></th>
+            <th>备注</th>
+            <th>密钥</th>
+            <th>状态</th>
+            <th class="num col-total">总余额<span class="legend"><i class="sw sw-paid"></i>充值<i class="sw sw-grant"></i>赠送</span></th>
+            <th class="num">充值余额</th>
+            <th class="num">赠送余额</th>
+            <th>币种</th>
+            <th>最近查询</th>
+            <th class="col-ops">操作</th>
+          </tr>
+        </thead>
+        <tbody id="ledgerBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" hidden>
+        <svg class="ic big"><use href="#i-inbox"/></svg>
+        <p id="emptyText">台账还是空的——把 sk- 开头的密钥粘贴到上方输入框，开始第一次查询。</p>
+      </div>
+    </div>
+
+    <div class="batch-bar" id="batchBar" hidden>
+      <span>已选 <strong id="selCount" class="mono">0</strong> 项</span>
+      <button type="button" class="btn danger ghost" id="btnDeleteSelected">
+        <svg class="ic"><use href="#i-trash"/></svg>删除所选
+      </button>
+      <button type="button" class="btn ghost" id="btnClearSelection">取消选择</button>
+    </div>
+  </section>
+
+  <!-- 安全说明 -->
+  <section class="panel security-panel">
+    <details>
+      <summary><svg class="ic"><use href="#i-shield"/></svg>安全说明：密钥去了哪里</summary>
+      <div class="security-body">
+        <ul>
+          <li><strong>唯一的网络请求：</strong>查询时，浏览器直接调用 DeepSeek 官方接口
+            <code>GET https://api.deepseek.com/user/balance</code>（请求头携带
+            <code>Authorization: Bearer &lt;你的密钥&gt;</code>）。本页通过内容安全策略（CSP）
+            在浏览器层面禁止向其它任何地址发起请求。</li>
+          <li><strong>密钥不上传：</strong>本页没有后端服务器。密钥、备注与查询结果只保存在
+            当前浏览器的 localStorage 中，不会发送给页面作者或任何第三方。</li>
+          <li><strong>零外部依赖：</strong>不加载任何外部脚本、字体、图标或统计工具，全部资源内置，
+            整站源码可在本仓库审查，也可以下载后离线打开使用。</li>
+          <li><strong>自行删除：</strong>清除站点数据（浏览器设置）或点击「清空」即可彻底删除所有记录；
+            在公用电脑使用后建议立即清空。</li>
+          <li><strong>导出注意：</strong>JSON / CSV 备份包含完整密钥，请像保管密码一样保管导出文件。</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p>本页面为开源静态工具，与 DeepSeek 官方无关；额度数据以 DeepSeek 官方平台为准。</p>
+  <p class="mono">GET https://api.deepseek.com/user/balance</p>
+</footer>
+
+<!-- 通用弹窗 -->
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <header class="modal-head">
+      <h3 id="modalTitle">标题</h3>
+      <button type="button" class="icon-btn" id="modalX" aria-label="关闭">
+        <svg class="ic"><use href="#i-x"/></svg>
+      </button>
+    </header>
+    <div class="modal-body" id="modalBody"></div>
+    <footer class="modal-foot">
+      <button type="button" class="btn ghost" id="modalCancel">取消</button>
+      <button type="button" class="btn primary" id="modalOk">确定</button>
+    </footer>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<input type="file" id="fileInput" accept=".json,.txt,application/json,text/plain" hidden>
+
+</body>
+</html>
