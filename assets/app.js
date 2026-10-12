@@ -485,7 +485,7 @@ const stampName = () => {
 
 function exportJson() {
   const payload = {
-    app: 'deepseek-balance-checker',
+    app: 'ds-balance',
     version: 1,
     exportedAt: new Date().toISOString(),
     count: state.entries.length,
