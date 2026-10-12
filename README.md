@@ -1,4 +1,4 @@
-# ds-balance · DeepSeek 额度台账
+# deepseek-quota · DeepSeek 额度台账
 
 批量查询 DeepSeek API Key 余额的纯静态网页。**密钥不出浏览器**：全部逻辑在前端运行，查询只发往 DeepSeek 官方接口，密钥与查询结果仅保存在当前浏览器的 localStorage 中。
 
