@@ -78,6 +78,7 @@ body {
 .wrap { width: min(1180px, 100% - 32px); margin-inline: auto; }
 .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.ic.fill { fill: currentColor; stroke: none; } /* 实心图标（如 GitHub 标志） */
 .ic.big { width: 40px; height: 40px; stroke-width: 1.5; color: var(--ink-3); }
 h1, h2, h3, p, ul { margin: 0; }
 a { color: var(--accent); }
@@ -369,6 +370,8 @@ table.ledger tbody tr:last-child td { border-bottom: 0; }
   text-align: center; color: var(--ink-3); font-size: 12px;
   display: grid; gap: 4px;
 }
+.foot a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+.foot a:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .foot .mono { font-size: 11px; letter-spacing: .02em; }
 
 /* ---------- 弹窗 ---------- */

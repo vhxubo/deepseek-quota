@@ -35,6 +35,7 @@
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
     <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></symbol>
+    <symbol id="i-github" viewBox="0 0 16 16"><path fill="currentColor" stroke="none" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></symbol>
   </defs>
 </svg>
 
@@ -53,6 +54,9 @@
       <span class="stamp" title="本页没有后端：密钥只保存在这台设备的浏览器里，查询仅发往 DeepSeek 官方接口 api.deepseek.com">
         <svg class="ic"><use href="#i-shield"/></svg>仅本地 · 不上传
       </span>
+      <a class="icon-btn" href="https://github.com/vhxubo/deepseek-quota" target="_blank" rel="noopener noreferrer" aria-label="GitHub 项目源码" title="GitHub 项目源码">
+        <svg class="ic fill"><use href="#i-github"/></svg>
+      </a>
       <button type="button" class="icon-btn" id="themeBtn" aria-label="切换主题" title="切换主题：自动 / 浅色 / 深色">
         <svg class="ic" data-theme-icon><use href="#i-moon"/></svg>
       </button>
@@ -192,7 +196,8 @@
           <li><strong>密钥不上传：</strong>本页没有后端服务器。密钥、备注与查询结果只保存在
             当前浏览器的 localStorage 中，不会发送给页面作者或任何第三方。</li>
           <li><strong>零外部依赖：</strong>不加载任何外部脚本、字体、图标或统计工具，全部资源内置，
-            整站源码可在本仓库审查，也可以下载后离线打开使用。</li>
+            整站源码可在 <a href="https://github.com/vhxubo/deepseek-quota" target="_blank" rel="noopener noreferrer">GitHub 仓库</a>审查，
+            也可以下载后离线打开使用。</li>
           <li><strong>自行删除：</strong>清除站点数据（浏览器设置）或点击「清空」即可彻底删除所有记录；
             在公用电脑使用后建议立即清空。</li>
           <li><strong>导出注意：</strong>JSON / CSV 备份包含完整密钥，请像保管密码一样保管导出文件。</li>
@@ -204,7 +209,7 @@
 </main>
 
 <footer class="foot">
-  <p>本页面为开源静态工具，与 DeepSeek 官方无关；额度数据以 DeepSeek 官方平台为准。</p>
+  <p>本页面为<a href="https://github.com/vhxubo/deepseek-quota" target="_blank" rel="noopener noreferrer">GitHub 开源项目</a>，与 DeepSeek 官方无关；额度数据以 DeepSeek 官方平台为准。</p>
   <p class="mono">GET https://api.deepseek.com/user/balance</p>
 </footer>
 
