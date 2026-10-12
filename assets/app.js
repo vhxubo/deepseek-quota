@@ -109,10 +109,17 @@ function keyDisplay(entry, revealed) {
 
 function fmtMoney(n, currency) {
   if (n == null || Number.isNaN(n)) return '—';
-  const num = n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const num = Math.abs(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const sym = CURRENCY_SYMBOL[currency] ?? '';
-  return sym ? `${sym}${num}` : `${num} ${currency || ''}`.trim();
+  const body = sym ? `${sym}${num}` : `${num} ${currency || ''}`.trim();
+  return n < 0 ? `-${body}` : body;
 }
+
+/* 欠费金额：余额为负时，负的部分即欠费 */
+const owedOf = (entry) => {
+  const b = entry.balances && entry.balances[0];
+  return b && b.total < 0 ? { currency: b.currency, amount: -b.total } : null;
+};
 
 function fmtRel(ts) {
   if (!ts) return '—';
@@ -287,20 +294,23 @@ function visibleEntries() {
 
 function counts() {
   const c = { total: state.entries.length, ok: 0, unavailable: 0, invalid: 0, error: 0, idle: 0 };
-  const sums = new Map(); // currency -> total
+  const sums = new Map();   // currency -> 余额合计（含欠费负值）
+  const owed = new Map();   // currency -> 欠费合计
   for (const e of state.entries) {
     if (e.status in c) c[e.status]++;
     if ((e.status === 'ok' || e.status === 'unavailable') && e.balances && e.balances[0]) {
       const cur = e.balances[0].currency || '—';
       sums.set(cur, (sums.get(cur) || 0) + (e.balances[0].total || 0));
+      const o = owedOf(e);
+      if (o) owed.set(o.currency, (owed.get(o.currency) || 0) + o.amount);
     }
   }
-  return { c, sums };
+  return { c, sums, owed };
 }
 
 /* ---------- 渲染 ---------- */
 function renderSummary() {
-  const { c, sums } = counts();
+  const { c, sums, owed } = counts();
   const chips = [];
   chips.push(`<span class="chip">密钥 <span class="mono">${c.total}</span></span>`);
   if (c.ok) chips.push(`<span class="chip"><i class="dot ok"></i>可用 <span class="mono">${c.ok}</span></span>`);
@@ -308,6 +318,9 @@ function renderSummary() {
   if (c.invalid) chips.push(`<span class="chip"><i class="dot invalid"></i>无效 <span class="mono">${c.invalid}</span></span>`);
   if (c.error) chips.push(`<span class="chip"><i class="dot error"></i>失败 <span class="mono">${c.error}</span></span>`);
   if (c.idle) chips.push(`<span class="chip"><i class="dot idle"></i>未查询 <span class="mono">${c.idle}</span></span>`);
+  for (const [cur, sum] of owed) {
+    chips.push(`<span class="chip"><i class="dot unavailable"></i>欠费合计 <span class="mono">${fmtMoney(sum, cur)}</span></span>`);
+  }
   for (const [cur, sum] of sums) {
     chips.push(`<span class="chip"><i class="dot sum"></i>${escapeHtml(cur)} 合计 <span class="mono">${fmtMoney(sum, cur)}</span></span>`);
   }
@@ -322,6 +335,18 @@ function balanceCellHtml(entry) {
     <div class="balance-bar" title="充值 ${fmtMoney(Math.max(b.tossed || 0, 0), b.currency)} / 赠送 ${fmtMoney(Math.max(b.granted || 0, 0), b.currency)}" aria-hidden="true">
       <i class="seg-paid"></i><i class="seg-grant"></i>
     </div>`;
+}
+
+/* 状态徽章下方的补充说明：欠费时直接标出欠费金额 */
+function statusDetailHtml(entry) {
+  if (entry.status !== 'unavailable') return '';
+  const owed = owedOf(entry);
+  const b = entry.balances && entry.balances[0];
+  if (owed) {
+    return `<div class="row-detail warn" title="接口返回 is_available: false，余额为负">欠费金额 <span class="mono">${fmtMoney(owed.amount, owed.currency)}</span></div>`;
+  }
+  if (b && b.total === 0) return '<div class="row-detail">余额已用尽，充值后恢复</div>';
+  return '<div class="row-detail">账户暂不可用（is_available: false）</div>';
 }
 
 function rowHtml(entry) {
@@ -347,6 +372,7 @@ function rowHtml(entry) {
     </td>
     <td data-label="状态">
       <span class="st-badge ${st.cls}" title="${title}"><i class="dot"></i>${st.label}</span>
+      ${statusDetailHtml(entry)}
       ${(entry.status === 'error' || entry.status === 'invalid') && entry.lastError ? `<div class="err-detail" title="${title}">${escapeHtml(entry.lastError)}</div>` : ''}
     </td>
     <td class="num col-total" data-label="总余额">${balanceCellHtml(entry)}</td>
@@ -496,14 +522,15 @@ function exportJson() {
 }
 
 function exportCsv() {
-  const head = ['备注', '密钥', '状态', '币种', '总余额', '充值余额', '赠送余额', '是否可用', '最近查询', '错误信息'];
+  const head = ['备注', '密钥', '状态', '币种', '总余额', '欠费金额', '充值余额', '赠送余额', '是否可用', '最近查询', '错误信息'];
   const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const lines = [head.map(q).join(',')];
   for (const e of state.entries) {
     const b = e.balances && e.balances[0];
+    const owed = owedOf(e);
     lines.push([
       e.remark || '', e.key, STATUS[e.status]?.label ?? e.status,
-      b ? b.currency : '', b ? b.total ?? '' : '', b ? b.tossed ?? '' : '', b ? b.granted ?? '' : '',
+      b ? b.currency : '', b ? b.total ?? '' : '', owed ? owed.amount : '', b ? b.tossed ?? '' : '', b ? b.granted ?? '' : '',
       e.isAvailable == null ? '' : (e.isAvailable ? '是' : '否'),
       e.lastCheckedAt ? new Date(e.lastCheckedAt).toLocaleString('zh-CN') : '',
       e.lastError || '',
